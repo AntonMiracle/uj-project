@@ -6,6 +6,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class UtilTest {
 
+    @Test
+    public void getUtilClass() {
+        assertThat(new Util()).isNotNull();
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void throwIAEWhenTrue() {
         Util.throwIAE(true, "MSG");

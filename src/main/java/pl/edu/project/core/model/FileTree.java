@@ -19,33 +19,16 @@ public class FileTree {
 
     }
 
-    public FileTree(Path root, int depth) {
+    protected FileTree(Path root, int depth) {
         setRoot(root);
         setDepthSearch(depth);
     }
 
-    public String readFiles() {
-        StringBuilder result = new StringBuilder();
-        search(FileTree.Type.FILE).forEach((f) -> result.append(readFile(f)));
-        return result.toString();
-    }
-
-    protected String readFile(Path path) {
-        throwIAEWhenNull(path);
-        String result = null;
-        try {
-            result = new String(Files.readAllBytes(path));
-        } catch (IOException e) {
-            throwIAE(true, "Path not exist.\n" + e.getMessage());
-        }
-        return result;
-    }
-
     public Stream<Path> search(Type type) {
         List<Path> paths = new ArrayList<>();
-        getPaths(getRoot(), getDepthSearch()).forEach((f) -> {
-            if (type == Type.FILE && !Files.isDirectory(f)) paths.add(f);
-            if (type == Type.FOLDER && Files.isDirectory(f)) paths.add(f);
+        getPaths().forEach((f) -> {
+            if (type == Type.FILES && !Files.isDirectory(f)) paths.add(f);
+            if (type == Type.FOLDERS && Files.isDirectory(f)) paths.add(f);
         });
         return paths.stream();
     }
@@ -69,11 +52,10 @@ public class FileTree {
         return root;
     }
 
-
-    protected Stream<Path> getPaths(Path root, int depth) {
+    protected Stream<Path> getPaths() {
         Stream<Path> result = null;
         try {
-            result = Files.walk(root, depth);
+            result = Files.walk(getRoot(), getDepthSearch());
         } catch (IOException e) {
             throwIAE(true, "Root path is not exist.\nOriginal stack trace" + e);
         }
@@ -84,7 +66,25 @@ public class FileTree {
         return new FileTree(root, depth);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FileTree fileTree = (FileTree) o;
+
+        if (depthSearch != fileTree.depthSearch) return false;
+        return root != null ? root.equals(fileTree.root) : fileTree.root == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = depthSearch;
+        result = 31 * result + (root != null ? root.hashCode() : 0);
+        return result;
+    }
+
     public enum Type {
-        FILE, FOLDER
+        FILES, FOLDERS
     }
 }

@@ -1,5 +1,7 @@
 package pl.edu.project.core.model;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -11,15 +13,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FileManagerTest {
+public class FileTreeTest {
     @ClassRule
     public static TemporaryFolder testFolder = new TemporaryFolder();
     private static Path root;
     private static int nameId = 1;
-    private FileTree manager;
+    private FileTree fileTree;
 
     @BeforeClass
     public static void beforeClass() throws IOException {
@@ -32,116 +35,106 @@ public class FileManagerTest {
 
     @Before
     public void before() {
-        manager = new FileTree();
+        fileTree = new FileTree();
     }
 
     @Test
     public void setAndGetDepthSearch() {
-        manager.setDepthSearch(5);
-        assertThat(manager.getDepthSearch()).isEqualTo(5);
+        fileTree.setDepthSearch(5);
+        assertThat(fileTree.getDepthSearch()).isEqualTo(5);
     }
 
     @Test
     public void whenDepthSearchNotSetThenGetDepthSearchReturnOne() {
-        assertThat(manager.getDepthSearch()).isEqualTo(1);
+        assertThat(fileTree.getDepthSearch()).isEqualTo(1);
     }
 
     @Test
     public void setAndGetRoot() {
-        manager.setRoot(root);
-        assertThat(manager.getRoot()).isEqualTo(root);
+        fileTree.setRoot(root);
+        assertThat(fileTree.getRoot()).isEqualTo(root);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void whenSetRootWithNullThenIAE() {
-        manager.setRoot(null);
+        fileTree.setRoot(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void whenSetRootWithNotExistPathThenIAE() {
-        manager.setRoot(Paths.get("wrong/path"));
+        fileTree.setRoot(Paths.get("wrong/path"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void whenGetRootReturnNullThenIAE() {
-        manager.getRoot();
+        fileTree.getRoot();
     }
 
     @Test
     public void getPaths() {
-        manager.setRoot(root);
-        manager.setDepthSearch(5);
-        assertThat(manager.getPaths(manager.getRoot(), manager.getDepthSearch()).count()).isEqualTo(15);
+        fileTree.setRoot(root);
+        fileTree.setDepthSearch(5);
+        assertThat(fileTree.getPaths().count()).isEqualTo(15);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void whenGetPathsWithWrongRootOrRootNullThenIAE() {
-        manager.getPaths(manager.getRoot(), manager.getDepthSearch());
+        fileTree.getPaths();
     }
 
     @Test
     public void countFilesPathWithDepth5() {
-        manager.setRoot(root);
-        manager.setDepthSearch(5);
-        assertThat(manager.search(FileTree.Type.FILE).count()).isEqualTo(10L);
+        fileTree.setRoot(root);
+        fileTree.setDepthSearch(5);
+        assertThat(fileTree.search(FileTree.Type.FILES).count()).isEqualTo(10L);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void whenSearchWithNullThenIAE() {
-        manager.search(null);
+        fileTree.search(null);
     }
 
     @Test
     public void countFilesPathWithDepth1() {
-        manager.setRoot(root);
-        manager.setDepthSearch(1);
-        assertThat(manager.search(FileTree.Type.FILE).count()).isEqualTo(2);
+        fileTree.setRoot(root);
+        fileTree.setDepthSearch(1);
+        assertThat(fileTree.search(FileTree.Type.FILES).count()).isEqualTo(2);
     }
 
     @Test
     public void countFolders() {
-        manager.setRoot(root);
-        manager.setDepthSearch(1);
-        assertThat(manager.search(FileTree.Type.FOLDER).count()).isEqualTo(2);
+        fileTree.setRoot(root);
+        fileTree.setDepthSearch(1);
+        assertThat(fileTree.search(FileTree.Type.FOLDERS).count()).isEqualTo(2);
     }
 
     @Test
-    public void readFileByPath() {
-        manager.setRoot(root);
-        manager.setDepthSearch(1);
-        Path path = manager.search(FileTree.Type.FILE).findFirst().get();
-        String expected = "This is file : 1000.txt\nHello World !!\n";
-        assertThat(manager.readFile(path)).isEqualTo(expected);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void whenReadFileWithWrongPathThenIAE() {
-        manager.readFile(Paths.get("path/"));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void whenReadFileWithNullPathThenIAE() {
-        manager.readFile(null);
+    public void fileManagerOfRootAndDepthSearch() {
+        fileTree = FileTree.of(root, 2);
+        assertThat(fileTree).isNotNull();
     }
 
     @Test
-    public void readFilesWithDepth1() {
-        manager.setRoot(root);
-        manager.setDepthSearch(1);
-        String expected = "This is file : 1000.txt\nHello World !!\n"
-                + "This is file : 14000.txt\nHello World !!\n";
-        assertThat(manager.readFiles()).isEqualTo(expected);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void whenReadFilesWithDepth1WithRootNullThenIAE() {
-        manager.readFiles();
+    public void checkEqualsAndHashCode() throws NoSuchAlgorithmException {
+        EqualsVerifier.forClass(FileTree.class)
+                .usingGetClass()
+                .suppress(Warning.NONFINAL_FIELDS)
+                .verify();
     }
 
     @Test
-    public void getFileManagerOfRootAndDepthSearch() {
-        manager = FileTree.of(root, 2);
-        assertThat(manager).isNotNull();
+    public void getFileTreeTypeFromValueOfString() {
+        assertThat(FileTree.Type.valueOf("FILES")).isEqualTo(FileTree.Type.FILES);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void whenValueOfWithWrongStringThenIAE() {
+        assertThat(FileTree.Type.valueOf("null")).isEqualTo(FileTree.Type.FILES);
+    }
+
+    @Test
+    public void valuesReturn2() {
+        assertThat(FileTree.Type.values().length).isEqualTo(2);
     }
 
     private static void writeFile(Path path) throws IOException {
