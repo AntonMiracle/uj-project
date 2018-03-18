@@ -19,7 +19,7 @@ public class FileManagerTest {
     public static TemporaryFolder testFolder = new TemporaryFolder();
     private static Path root;
     private static int nameId = 1;
-    private FileManager manager;
+    private FileTree manager;
 
     @BeforeClass
     public static void beforeClass() throws IOException {
@@ -32,13 +32,18 @@ public class FileManagerTest {
 
     @Before
     public void before() {
-        manager = new FileManager();
+        manager = new FileTree();
     }
 
     @Test
-    public void setAndGetDeepSearchDeep() {
+    public void setAndGetDepthSearch() {
         manager.setDepthSearch(5);
         assertThat(manager.getDepthSearch()).isEqualTo(5);
+    }
+
+    @Test
+    public void whenDepthSearchNotSetThenGetDepthSearchReturnOne() {
+        assertThat(manager.getDepthSearch()).isEqualTo(1);
     }
 
     @Test
@@ -47,40 +52,80 @@ public class FileManagerTest {
         assertThat(manager.getRoot()).isEqualTo(root);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void whenSetRootWithNullThenIAE() {
+        manager.setRoot(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void whenSetRootWithNotExistPathThenIAE() {
+        manager.setRoot(Paths.get("wrong/path"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void whenGetRootReturnNullThenIAE() {
+        manager.getRoot();
+    }
+
     @Test
-    public void countAllPathsWithDepth5() {
+    public void getPaths() {
         manager.setRoot(root);
         manager.setDepthSearch(5);
-        assertThat(manager.getAllPaths().count()).isEqualTo(15);
+        assertThat(manager.getPaths(manager.getRoot(), manager.getDepthSearch()).count()).isEqualTo(15);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void whenGetPathsWithWrongRootOrRootNullThenIAE() {
+        manager.getPaths(manager.getRoot(), manager.getDepthSearch());
     }
 
     @Test
     public void countFilesPathWithDepth5() {
         manager.setRoot(root);
         manager.setDepthSearch(5);
-        assertThat(manager.searchFiles().count()).isEqualTo(10L);
+        assertThat(manager.search(FileTree.Type.FILE).count()).isEqualTo(10L);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void whenSearchWithNullThenIAE() {
+        manager.search(null);
     }
 
     @Test
     public void countFilesPathWithDepth1() {
         manager.setRoot(root);
         manager.setDepthSearch(1);
-        assertThat(manager.searchFiles().count()).isEqualTo(2);
+        assertThat(manager.search(FileTree.Type.FILE).count()).isEqualTo(2);
+    }
+
+    @Test
+    public void countFolders() {
+        manager.setRoot(root);
+        manager.setDepthSearch(1);
+        assertThat(manager.search(FileTree.Type.FOLDER).count()).isEqualTo(2);
     }
 
     @Test
     public void readFileByPath() {
         manager.setRoot(root);
         manager.setDepthSearch(1);
-        Path path = manager.searchFiles().findFirst().get();
+        Path path = manager.search(FileTree.Type.FILE).findFirst().get();
         String expected = "This is file : 1000.txt\nHello World !!\n";
         assertThat(manager.readFile(path)).isEqualTo(expected);
     }
 
-    //expected runtime for readFile + path
+    @Test(expected = IllegalArgumentException.class)
+    public void whenReadFileWithWrongPathThenIAE() {
+        manager.readFile(Paths.get("path/"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void whenReadFileWithNullPathThenIAE() {
+        manager.readFile(null);
+    }
 
     @Test
-    public void readAllFilesWithDepth1() {
+    public void readFilesWithDepth1() {
         manager.setRoot(root);
         manager.setDepthSearch(1);
         String expected = "This is file : 1000.txt\nHello World !!\n"
@@ -88,13 +133,16 @@ public class FileManagerTest {
         assertThat(manager.readFiles()).isEqualTo(expected);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void whenReadFilesWithDepth1WithRootNullThenIAE() {
+        manager.readFiles();
+    }
 
-//    @Test
-//    public void countFolders() {
-//        manager.setRoot(root);
-//        manager.setDepthSearch(1);
-//assertThat(manager.countFolder()).isEqualTo(1);
-//    }
+    @Test
+    public void getFileManagerOfRootAndDepthSearch() {
+        manager = FileTree.of(root, 2);
+        assertThat(manager).isNotNull();
+    }
 
     private static void writeFile(Path path) throws IOException {
         if (!Files.isDirectory(path)) {
