@@ -1,4 +1,4 @@
-package pl.edu.project.core.model;
+package pl.edu.uj.project.core.model;
 
 import org.junit.Test;
 

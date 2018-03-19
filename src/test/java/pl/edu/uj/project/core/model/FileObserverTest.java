@@ -1,5 +1,7 @@
-package pl.edu.project.core.model;
+package pl.edu.uj.project.core.model;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,9 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -37,7 +37,6 @@ public class FileObserverTest {
         write(file, text);
         path = file.toPath();
     }
-
 
     @Test
     public void setAndGetPath() {
@@ -99,20 +98,25 @@ public class FileObserverTest {
         assertThat(observer.count(search)).isEqualTo(count);
     }
 
+    @Test
+    public void countAllCharsInFile() {
+        observer.setPath(path);
+        assertThat(observer.count(FileObserver.Element.SYMBOLS)).isEqualTo(observer.read().toCharArray().length);
+    }
 
     @Test
-    public void countLinesInFileByUsingTypes() {
+    public void countLinesInFile() {
         observer.setPath(path);
         int count = 1;
         char search = '\n';
         for (char symbol : text.toCharArray()) {
             if (search == symbol) ++count;
         }
-        assertThat(observer.count(FileObserver.Type.LINES)).isEqualTo(count);
+        assertThat(observer.count(FileObserver.Element.LINES)).isEqualTo(count);
     }
 
     @Test
-    public void countWorldsInFileByUsingTypes() {
+    public void countWorldsInFile() {
         observer.setPath(path);
         long count = 0;
         boolean isPreviousAlphabetSymbol = false;
@@ -126,7 +130,7 @@ public class FileObserverTest {
                 isPreviousAlphabetSymbol = false;
             }
         }
-        assertThat(observer.count(FileObserver.Type.WORLDS)).isEqualTo(count);
+        assertThat(observer.count(FileObserver.Element.WORDS)).isEqualTo(count);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -150,7 +154,7 @@ public class FileObserverTest {
                 }
             }
         }
-        List<String> actual = observer.get(FileObserver.Type.WORLDS).collect(Collectors.toList());
+        List<String> actual = observer.get(FileObserver.Element.WORDS).collect(Collectors.toList());
         assertThat(Arrays.deepEquals(actual.toArray(), expected.toArray())).isTrue();
     }
 
@@ -170,8 +174,18 @@ public class FileObserverTest {
                 if (i == text.length - 1 && line.length() > 0) expected.add(line.toString());
             }
         }
-        List<String> actual = observer.get(FileObserver.Type.LINES).collect(Collectors.toList());
+        List<String> actual = observer.get(FileObserver.Element.LINES).collect(Collectors.toList());
         assertThat(Arrays.deepEquals(actual.toArray(), expected.toArray())).isTrue();
+    }
+
+    @Test
+    public void getSymbols() {
+        observer.setPath(path);
+        char[] text = observer.read().toCharArray();
+        int index = 0;
+        for (String actual : observer.get(FileObserver.Element.SYMBOLS).collect(Collectors.toList())) {
+            assertThat(actual.equals(String.valueOf(text[index++]))).isTrue();
+        }
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -194,17 +208,73 @@ public class FileObserverTest {
 
     @Test
     public void getWorldsFromValueOf() {
-        assertThat(FileObserver.Type.valueOf("WORLDS")).isSameAs(FileObserver.Type.WORLDS);
+        assertThat(FileObserver.Element.valueOf("WORDS")).isSameAs(FileObserver.Element.WORDS);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void whenValueOfWithWrongStringThenIAE() {
-        FileObserver.Type.valueOf("ddd");
+        FileObserver.Element.valueOf("ddd");
     }
 
     @Test
     public void valuesReturn2() {
-        assertThat(FileObserver.Type.values().length).isEqualTo(2);
+        assertThat(FileObserver.Element.values().length).isEqualTo(3);
+    }
+
+    @Test
+    public void checkEqualsAndHashCode() {
+        EqualsVerifier.forClass(FileObserver.class)
+                .withPrefabValues(Charset.class, StandardCharsets.UTF_8, StandardCharsets.UTF_16)
+                .usingGetClass()
+                .suppress(Warning.NONFINAL_FIELDS)
+                .verify();
+    }
+
+    @Test
+    public void statisticsOfSymbols() {
+        observer = FileObserver.of(path);
+        Map<String, Long> expected = new TreeMap<>();
+        for (char ch : observer.read().toCharArray()) {
+            String symbol = String.valueOf(ch);
+            if (expected.containsKey(symbol)) {
+                expected.put(symbol, expected.get(symbol) + 1);
+            } else {
+                expected.put(symbol, 1L);
+            }
+        }
+        Map<String, Long> actual = observer.statisticOf(FileObserver.Element.SYMBOLS);
+        assertThat(actual).isEqualTo(expected);
+
+    }
+
+    @Test
+    public void statisticsOfWords() {
+        observer = FileObserver.of(path);
+        Map<String, Long> expected = new TreeMap<>();
+        for (String word : observer.get(FileObserver.Element.WORDS).collect(Collectors.toList())) {
+            if (expected.containsKey(word)) {
+                expected.put(word, expected.get(word) + 1);
+            } else {
+                expected.put(word, 1L);
+            }
+        }
+        Map<String, Long> actual = observer.statisticOf(FileObserver.Element.WORDS);
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    public void statisticsOfLine() {
+        observer = FileObserver.of(path);
+        Map<String, Long> expected = new TreeMap<>();
+        for (String line : observer.get(FileObserver.Element.LINES).collect(Collectors.toList())) {
+            if (expected.containsKey(line)) {
+                expected.put(line, expected.get(line) + 1);
+            } else {
+                expected.put(line, 1L);
+            }
+        }
+        Map<String, Long> actual = observer.statisticOf(FileObserver.Element.LINES);
+        assertThat(actual).isEqualTo(expected);
     }
 
     private void write(File file, String text) throws IOException {
