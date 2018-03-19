@@ -56,17 +56,17 @@ public class FileTreeTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenSetRootWithNullThenIAE() {
+    public void whenSetRootWithNullThenThrowIAE() {
         fileTree.setRoot(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenSetRootWithNotExistPathThenIAE() {
+    public void whenSetRootWithNotExistPathThenThrowIAE() {
         fileTree.setRoot(Paths.get("wrong/path"));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenGetRootReturnNullThenIAE() {
+    public void whenGetRootReturnNullThenThrowIAE() {
         fileTree.getRoot();
     }
 
@@ -78,7 +78,7 @@ public class FileTreeTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenGetPathsWithWrongRootOrRootNullThenIAE() {
+    public void whenGetPathsWithWrongRootOrRootNullThenThrowIAE() {
         fileTree.getPaths();
     }
 
@@ -90,7 +90,7 @@ public class FileTreeTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenSearchWithNullThenIAE() {
+    public void whenSearchWithNullThenThrowIAE() {
         fileTree.search(null);
     }
 
