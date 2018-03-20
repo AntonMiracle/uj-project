@@ -9,9 +9,19 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static pl.edu.uj.project.core.model.Util.throwIAE;
+import static pl.edu.uj.project.core.model.Util.throwIAEWhenNull;
+
+/**
+ * FileObserver is for observe file inside.
+ * Count and get symbols,words,lines or statistic.
+ *
+ * @author Anton Bondarenko. {@code b.anton.m.1986@gmail.com}
+ * @version 1.0
+ */
 public class FileObserver {
     private Path path;
-    private Charset charset;
+    private Charset charset = Charset.defaultCharset();
 
     protected FileObserver() {
 
@@ -26,33 +36,51 @@ public class FileObserver {
         setCharset(charset);
     }
 
-    protected String read() {
-        try {
-            return new String(Files.readAllBytes(getPath()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    /**
+     * Create FileObserver by path of file.
+     * Use default charset for file.
+     *
+     * @param path of file wich need to observe.
+     * @return FileObserver.
+     * @throws IllegalArgumentException when path {@code null, not file, not exist or not readable}.
+     */
+    public static FileObserver of(Path path) throws IllegalArgumentException {
+        return new FileObserver(path);
+    }
+
+    /**
+     * Create FileObserver by path of file and charset of file.
+     *
+     * @param path    of file wich need to observe.
+     * @param charset of file.
+     * @return FileObserver.
+     * @throws IllegalArgumentException when path {@code null, not file, not exist or not readable}.
+     * @throws IllegalArgumentException when charset {@code null}.
+     */
+    public static FileObserver of(Path path, Charset charset) throws IllegalArgumentException {
+        return new FileObserver(path, charset);
+    }
+
+    protected void setCharset(Charset charset) {
+        throwIAEWhenNull(charset);
+        this.charset = charset;
     }
 
     protected void setPath(Path path) {
-        Util.throwIAEWhenNull(path);
-        Util.throwIAE(!Files.exists(path), "Path is not exist");
-        Util.throwIAE(Files.isDirectory(path), "Path is folder");
-        Util.throwIAE(!Files.isReadable(path), "File not readable with path:" + path.toString());
+        throwIAEWhenNull(path);
+        throwIAE(!Files.exists(path), "Path is not exist");
+        throwIAE(Files.isDirectory(path), "Path is folder");
+        throwIAE(!Files.isReadable(path), "File not readable with path:" + path.toString());
         this.path = path;
     }
 
     public Path getPath() {
-        Util.throwIAEWhenNull(path);
+        throwIAEWhenNull(path);
         return path;
     }
 
-    public static FileObserver of(Path path) {
-        return new FileObserver(path);
-    }
-
-    public static FileObserver of(Path path, Charset charset) {
-        return new FileObserver(path, charset);
+    public Charset getCharset() {
+        return charset;
     }
 
     public long count(char search) {
@@ -60,8 +88,15 @@ public class FileObserver {
         return symbols.parallel().filter(c -> c == search).count();
     }
 
-    public long count(Element element) {
-        Util.throwIAEWhenNull(element);
+    /**
+     * Count elements in file.
+     *
+     * @param element {@link Element}.
+     * @return long.
+     * @throws IllegalArgumentException when element null or not exist.
+     */
+    public long count(Element element) throws IllegalArgumentException {
+        throwIAEWhenNull(element);
         long count = 0;
         if (element == Element.LINES) count = get(Element.LINES).count();
         if (element == Element.WORDS) count = get(Element.WORDS).count();
@@ -69,26 +104,25 @@ public class FileObserver {
         return count;
     }
 
-    protected void setCharset(Charset charset) {
-        Util.throwIAEWhenNull(charset);
-        this.charset = charset;
-    }
-
-    public Charset getCharset() {
-        return charset != null ? charset : Charset.defaultCharset();
-    }
-
-    public Stream<String> get(Element element) {
-        Util.throwIAEWhenNull(element);
+    protected Stream<String> get(Element element) {
+        throwIAEWhenNull(element);
         Stream<String> result = null;
         try {
             if (element == Element.WORDS) result = Pattern.compile("\\PL+").splitAsStream(read());
             if (element == Element.LINES) result = Files.lines(getPath(), getCharset());
             if (element == Element.SYMBOLS) result = read().chars().mapToObj(i -> String.valueOf((char) i));
         } catch (IOException e) {
-            Util.throwIAE(true, e.getMessage());
+            throwIAE(true, e.getMessage());
         }
         return result;
+    }
+
+    protected String read() {
+        try {
+            return new String(Files.readAllBytes(getPath()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -109,7 +143,15 @@ public class FileObserver {
         return result;
     }
 
-    public Map<String, Long> statisticOf(Element element) {
+    /**
+     * Make statistic for element in file.
+     *
+     * @param element {@link Element}.
+     * @return {@code Map<String,Long>}.
+     * where String is element and long is value of element in file.
+     * @throws IllegalArgumentException when element null is not exist.
+     */
+    public Map<String, Long> statisticOf(Element element) throws IllegalArgumentException {
         Map<String, Long> result = new TreeMap<>();
         get(element).forEach(string -> {
             if (result.containsKey(string)) {
@@ -119,11 +161,9 @@ public class FileObserver {
             }
         });
         return result;
-
     }
 
     public enum Element {
         WORDS, LINES, SYMBOLS
     }
-
 }

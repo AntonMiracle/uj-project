@@ -12,9 +12,16 @@ import java.util.stream.Stream;
 import static pl.edu.uj.project.core.model.Util.throwIAE;
 import static pl.edu.uj.project.core.model.Util.throwIAEWhenNull;
 
+/**
+ * FileTree is consisted from files and folders that have same root path.
+ * Count and get files, folders or statistic.
+ *
+ * @author Anton Bondarenko. {@code b.anton.m.1986@gmail.com}
+ * @version 1.0
+ */
 public class FileTree {
 
-    private int depthSearch;
+    private int depth = 1;
     private Path root;
 
     protected FileTree() {
@@ -23,12 +30,37 @@ public class FileTree {
 
     protected FileTree(Path root, int depth) {
         setRoot(root);
-        setDepthSearch(depth);
+        setDepth(depth);
     }
 
-    public FileTree(Path root) {
+    protected FileTree(Path root) {
         setRoot(root);
-        setDepthSearch(1);
+        setDepth(1);
+    }
+
+    /**
+     * Create FileTree with root path.
+     * Use default depth = 1.
+     *
+     * @param root path of FileTree
+     * @return FileTree
+     * @throws IllegalArgumentException when root {@code null or not exist}.
+     */
+    public static FileTree of(Path root) throws IllegalArgumentException {
+        return new FileTree(root);
+    }
+
+    /**
+     * Create FileTree by root path and depth.
+     * When {@code depth <= 0} then change {@code depth == 1};
+     *
+     * @param root  path of FileTree.
+     * @param depth of FileTree
+     * @return FileTree.
+     * @throws IllegalArgumentException when root {@code null or not exist}.
+     */
+    public static FileTree of(Path root, int depth) throws IllegalArgumentException {
+        return new FileTree(root, depth);
     }
 
     public Stream<Path> search(Element element) {
@@ -41,18 +73,20 @@ public class FileTree {
         return paths.stream();
     }
 
-    protected void setDepthSearch(int searchDeep) {
-        this.depthSearch = searchDeep;
-    }
-
-    public int getDepthSearch() {
-        return depthSearch == 0 ? 1 : depthSearch;
+    protected void setDepth(int depth) {
+        if (depth > 1) {
+            this.depth = depth;
+        }
     }
 
     protected void setRoot(Path root) {
         throwIAEWhenNull(root);
         throwIAE(!Files.exists(root), "Root is not exist");
         this.root = root;
+    }
+
+    public int getDepth() {
+        return depth;
     }
 
     public Path getRoot() {
@@ -63,15 +97,11 @@ public class FileTree {
     protected Stream<Path> getPaths() {
         Stream<Path> result = null;
         try {
-            result = Files.walk(getRoot(), getDepthSearch());
+            result = Files.walk(getRoot(), getDepth());
         } catch (IOException e) {
             throwIAE(true, "Root path is not exist.\nOriginal stack trace" + e);
         }
         return result;
-    }
-
-    public static FileTree of(Path root, int depth) {
-        return new FileTree(root, depth);
     }
 
     @Override
@@ -81,23 +111,43 @@ public class FileTree {
 
         FileTree fileTree = (FileTree) o;
 
-        if (depthSearch != fileTree.depthSearch) return false;
+        if (depth != fileTree.depth) return false;
         return root != null ? root.equals(fileTree.root) : fileTree.root == null;
     }
 
     @Override
     public int hashCode() {
-        int result = depthSearch;
+        int result = depth;
         result = 31 * result + (root != null ? root.hashCode() : 0);
         return result;
     }
 
-    public static FileTree of(Path root) {
-        return new FileTree(root);
+    /**
+     * Count elements in tree.
+     *
+     * @param element {@link Element}.
+     * @return long.
+     * @throws IllegalArgumentException when element null or not exist.
+     */
+    public long count(Element element) throws IllegalArgumentException {
+        return search(element).count();
     }
 
-    public long count(Element element) {
-        return search(element).count();
+    /**
+     * Make statistic for element in FileTree.
+     *
+     * @param element {@link Element}.
+     * @return {@code Map<String,Long>}.
+     * where String is element and long is value of element in FileTree.
+     * @throws IllegalArgumentException when element null or not exist.
+     */
+    public Map<String, Long> statistic(Element element) throws IllegalArgumentException {
+        throwIAEWhenNull(element);
+        Map<String, Long> result = new TreeMap<>();
+        if (element == Element.FILES_AND_FOLDERS) result = statistic();
+        if (element == Element.FILES) result.put(Element.FILES.toString(), statistic().get(Element.FILES));
+        if (element == Element.FOLDERS) result.put(Element.FOLDERS.toString(), statistic().get(Element.FOLDERS));
+        return result;
     }
 
     private Map<String, Long> statistic() {
@@ -113,14 +163,6 @@ public class FileTree {
                 result.put(files, result.get(files) + 1L);
             }
         });
-        return result;
-    }
-
-    public Map<String, Long> statistic(Element element) {
-        Map<String, Long> result = new TreeMap<>();
-        if (element == Element.FILES_AND_FOLDERS) result = statistic();
-        if (element == Element.FILES) result.put(Element.FILES.toString(), statistic().get(Element.FILES));
-        if (element == Element.FOLDERS) result.put(Element.FOLDERS.toString(), statistic().get(Element.FOLDERS));
         return result;
     }
 

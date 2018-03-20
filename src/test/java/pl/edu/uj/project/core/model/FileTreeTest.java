@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import pl.edu.uj.project.core.TestHelper;
+import pl.edu.uj.project.TestHelper;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -27,16 +27,26 @@ public class FileTreeTest extends TestHelper {
         tree = new FileTree();
     }
 
-
     @Test
-    public void setAndGetDepthSearch() {
-        tree.setDepthSearch(5);
-        assertThat(tree.getDepthSearch()).isEqualTo(5);
+    public void setAndGetDepth() {
+        tree.setDepth(5);
+        assertThat(tree.getDepth()).isEqualTo(5);
     }
 
     @Test
-    public void whenDepthSearchNotSetThenDepthOne() {
-        assertThat(tree.getDepthSearch()).isEqualTo(1);
+    public void whenDepthNotSetThenDepthOne() {
+        assertThat(tree.getDepth()).isEqualTo(1);
+    }
+
+    @Test
+    public void whenSetDepthWithZeroThenDepthOne() {
+        tree.setDepth(0);
+        assertThat(tree.getDepth()).isEqualTo(1);
+    }
+    @Test
+    public void whenSetDepthWithNegativeThenDepthOne() {
+        tree.setDepth(-1);
+        assertThat(tree.getDepth()).isEqualTo(1);
     }
 
     @Test
@@ -63,7 +73,7 @@ public class FileTreeTest extends TestHelper {
     @Test
     public void getPaths() {
         tree.setRoot(root);
-        tree.setDepthSearch(5);
+        tree.setDepth(5);
         assertThat(tree.getPaths().count()).isEqualTo(15);
     }
 
@@ -75,7 +85,7 @@ public class FileTreeTest extends TestHelper {
     @Test
     public void countFilesPathWithDepth5() {
         tree.setRoot(root);
-        tree.setDepthSearch(5);
+        tree.setDepth(5);
         assertThat(tree.count(FileTree.Element.FILES)).isEqualTo(10L);
     }
 
@@ -87,20 +97,21 @@ public class FileTreeTest extends TestHelper {
     @Test
     public void searchFilesPathsWithDepth1() {
         tree.setRoot(root);
-        tree.setDepthSearch(1);
+        tree.setDepth(1);
         assertThat(tree.search(FileTree.Element.FILES).count()).isEqualTo(2);
     }
 
     @Test
     public void searchFoldersPathsWithDepth1() {
         tree.setRoot(root);
-        tree.setDepthSearch(1);
+        tree.setDepth(1);
         assertThat(tree.search(FileTree.Element.FOLDERS).count()).isEqualTo(2);
     }
+
     @Test
     public void searchAllPathsWithDepth1() {
         tree.setRoot(root);
-        tree.setDepthSearch(1);
+        tree.setDepth(1);
         assertThat(tree.search(FileTree.Element.FILES_AND_FOLDERS).count()).isEqualTo(4);
     }
 
@@ -113,7 +124,7 @@ public class FileTreeTest extends TestHelper {
     @Test
     public void fileTreeOfRootWithDepthSearch1() {
         tree = FileTree.of(root);
-        assertThat(tree.getDepthSearch()).isEqualTo(1);
+        assertThat(tree.getDepth()).isEqualTo(1);
         assertThat(tree).isNotNull();
     }
 
@@ -134,7 +145,6 @@ public class FileTreeTest extends TestHelper {
     @Test
     public void countFilesWithDepth() {
         tree = FileTree.of(root, 3);
-        System.out.println(tree.count(FileTree.Element.FILES));
         assertThat(tree.count(FileTree.Element.FILES)).isEqualTo(6L);
 
     }
@@ -162,5 +172,10 @@ public class FileTreeTest extends TestHelper {
         expected.put(FileTree.Element.FOLDERS.toString(), 4L);
         Map<String, Long> actual = tree.statistic(FileTree.Element.FILES_AND_FOLDERS);
         assertThat(expected).isEqualTo(actual);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void whenGetStatisticWithNullThenThrowIAE() {
+        tree.statistic(null);
     }
 }

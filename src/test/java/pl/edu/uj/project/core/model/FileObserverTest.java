@@ -280,4 +280,5 @@ public class FileObserverTest {
     private void write(File file, String text) throws IOException {
         Files.write(file.toPath(), text.getBytes());
     }
+
 }
