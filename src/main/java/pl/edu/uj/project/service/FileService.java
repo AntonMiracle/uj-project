@@ -4,6 +4,7 @@ import pl.edu.uj.project.core.model.FileObserver;
 import pl.edu.uj.project.core.model.FileTree;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.TreeMap;
@@ -25,23 +26,8 @@ public class FileService {
 
     }
 
-    protected FileService(Path root) {
-        setTree(FileTree.of(root));
-    }
-
     protected FileService(Path path, int depth) {
         setTree(FileTree.of(path, depth));
-    }
-
-    /**
-     * Create FileService with FileTree with root path.
-     *
-     * @param root of FileTree.
-     * @return FIleService.
-     * @throws IllegalArgumentException when {@link FileTree#of(Path)}
-     */
-    public static FileService of(Path root) throws IllegalArgumentException {
-        return new FileService(root);
     }
 
     /**
@@ -71,17 +57,6 @@ public class FileService {
     }
 
     /**
-     * {@link FileObserver#of(Path)}.
-     *
-     * @param path for FileObserver.
-     * @return FileObserver.
-     * @throws IllegalArgumentException when {@link FileObserver#of(Path)}
-     */
-    public FileObserver getObserver(Path path) throws IllegalArgumentException {
-        return FileObserver.of(path);
-    }
-
-    /**
      * {@link FileObserver#of(Path, Charset)}.
      *
      * @param path    for FileObserver.
@@ -90,7 +65,7 @@ public class FileService {
      * @throws IllegalArgumentException when {@link FileObserver#of(Path, Charset)}
      */
     public FileObserver getObserver(Path path, Charset charset) throws IllegalArgumentException {
-        return FileObserver.of(getObserver(path).getPath(), charset);
+        return FileObserver.of(path, charset);
     }
 
     @Override
@@ -109,34 +84,40 @@ public class FileService {
     }
 
     /**
-     * {@link FileObserver#count(FileObserver.Element)}.
+     * Count element.
      *
      * @param element {@link FileObserver.Element}.
      * @return long.
-     * @throws IllegalArgumentException when {@link FileObserver#count(FileObserver.Element)}.
+     * @throws IllegalArgumentException when element is null.
      */
-    public long count(FileObserver.Element element) throws IllegalArgumentException {
+    public long count(FileObserver.Element element, Charset charset) throws IllegalArgumentException {
         throwIAEWhenNull(element);
-        return count(element, (char) -100);
+        return count(element, (char) -100, charset);
     }
 
     /**
-     * {@link FileObserver#count(char)}.
+     * Count symbol.
      *
-     * @param symbol wich count in file.
+     * @param symbol in file.
      * @return long.
      */
-    public long count(char symbol) {
-        return count(null, symbol);
+    public long count(char symbol, Charset charset) {
+        return count(null, symbol, charset);
     }
 
-    private long count(FileObserver.Element element, char symbol) {
+    private long count(FileObserver.Element element, char symbol, Charset charset) {
         long result = 0;
+        Long value;
         for (Path path : getTree().search(FileTree.Element.FILES).collect(Collectors.toList())) {
             if (element != null) {
-                result += getObserver(path).count(element);
+                Map<String, Long> statistic = getObserver(path, charset).statisticOf(element);
+                for (String key : statistic.keySet()) {
+                    value = statistic.get(key);
+                    result += value != null ? value.longValue() : 0;
+                }
             } else {
-                result += getObserver(path).count(symbol);
+                value = getObserver(path, StandardCharsets.UTF_8).statisticOf(FileObserver.Element.SYMBOLS).get(String.valueOf(symbol));
+                result += value != null ? value.longValue() : 0;
             }
         }
         return result;
@@ -148,18 +129,27 @@ public class FileService {
      * @throws IllegalArgumentException when element null or not exist.
      */
     public long count(FileTree.Element element) throws IllegalArgumentException {
-        return getTree().count(element);
+        long count = 0;
+        Map<String, Long> statistic = getTree().statistic(element);
+        for (String key : statistic.keySet()) {
+            count += statistic.get(key).longValue();
+        }
+        return count;
     }
 
     /**
      * {@link FileTree#statistic(FileTree.Element)}.
      *
-     * @param element {@link FileTree.Element}.
      * @return {@code Map<String,Long>}.
-     * @throws IllegalArgumentException when {@link FileTree#statistic(FileTree.Element)}.
      */
-    public Map<String, Long> statistic(FileTree.Element element) throws IllegalArgumentException {
-        return getTree().statistic(element);
+    public Map<String, Long> statistic(Charset charset) {
+        Map<String, Long> statistic = new TreeMap<>();
+        statistic.put(FileTree.Element.FOLDERS.toString(), count(FileTree.Element.FOLDERS));
+        statistic.put(FileTree.Element.FILES.toString(), count(FileTree.Element.FILES));
+//        statistic.put(FileObserver.Element.LINES.toString(), count(FileObserver.Element.LINES, charset));
+        statistic.put(FileObserver.Element.WORDS.toString(), count(FileObserver.Element.WORDS, charset));
+        statistic.put(FileObserver.Element.SYMBOLS.toString(), count(FileObserver.Element.SYMBOLS, charset));
+        return statistic;
     }
 
     /**

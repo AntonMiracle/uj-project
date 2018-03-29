@@ -86,58 +86,6 @@ public class FileObserverTest {
         assertThat(observer.read()).isEqualTo(text);
     }
 
-
-    @Test
-    public void countCharInFile() {
-        observer.setPath(path);
-        int count = 0;
-        char search = 'e';
-        for (char symbol : text.toCharArray()) {
-            if (search == symbol) ++count;
-        }
-        assertThat(observer.count(search)).isEqualTo(count);
-    }
-
-    @Test
-    public void countAllCharsInFile() {
-        observer.setPath(path);
-        assertThat(observer.count(FileObserver.Element.SYMBOLS)).isEqualTo(observer.read().toCharArray().length);
-    }
-
-    @Test
-    public void countLinesInFile() {
-        observer.setPath(path);
-        int count = 1;
-        char search = '\n';
-        for (char symbol : text.toCharArray()) {
-            if (search == symbol) ++count;
-        }
-        assertThat(observer.count(FileObserver.Element.LINES)).isEqualTo(count);
-    }
-
-    @Test
-    public void countWorldsInFile() {
-        observer.setPath(path);
-        long count = 0;
-        boolean isPreviousAlphabetSymbol = false;
-        for (char symbol : observer.read().toCharArray()) {
-            if (Pattern.compile("[a-zA-Z]").matcher(String.valueOf(symbol)).matches()) {
-                if (!isPreviousAlphabetSymbol) {
-                    ++count;
-                    isPreviousAlphabetSymbol = true;
-                }
-            } else {
-                isPreviousAlphabetSymbol = false;
-            }
-        }
-        assertThat(observer.count(FileObserver.Element.WORDS)).isEqualTo(count);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void whenCountWithNullThenThrowIAE() {
-        observer.count(null);
-    }
-
     @Test
     public void getWorlds() {
         observer.setPath(path);
@@ -194,12 +142,6 @@ public class FileObserverTest {
     }
 
     @Test
-    public void fileObserverOfPath() {
-        observer = FileObserver.of(path);
-        assertThat(observer.getPath()).isEqualTo(path);
-    }
-
-    @Test
     public void fileObserverOfPathAndCharset() {
         observer = FileObserver.of(path, StandardCharsets.UTF_16LE);
         assertThat(observer.getPath()).isEqualTo(path);
@@ -232,7 +174,7 @@ public class FileObserverTest {
 
     @Test
     public void statisticsOfSymbols() {
-        observer = FileObserver.of(path);
+        observer = FileObserver.of(path, StandardCharsets.UTF_8);
         Map<String, Long> expected = new TreeMap<>();
         for (char ch : observer.read().toCharArray()) {
             String symbol = String.valueOf(ch);
@@ -249,7 +191,7 @@ public class FileObserverTest {
 
     @Test
     public void statisticsOfWords() {
-        observer = FileObserver.of(path);
+        observer = FileObserver.of(path, StandardCharsets.UTF_8);
         Map<String, Long> expected = new TreeMap<>();
         for (String word : observer.get(FileObserver.Element.WORDS).collect(Collectors.toList())) {
             if (expected.containsKey(word)) {
@@ -264,7 +206,7 @@ public class FileObserverTest {
 
     @Test
     public void statisticsOfLine() {
-        observer = FileObserver.of(path);
+        observer = FileObserver.of(path, StandardCharsets.UTF_8);
         Map<String, Long> expected = new TreeMap<>();
         for (String line : observer.get(FileObserver.Element.LINES).collect(Collectors.toList())) {
             if (expected.containsKey(line)) {

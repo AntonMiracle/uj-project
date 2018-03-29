@@ -33,7 +33,7 @@ public class FileServiceTest extends TestHelper {
         root = Paths.get(testFolder.getRoot().toString());
         generationFolderAndFilesForTesting(root.toString(), depth);
         tree = FileTree.of(root, depth);
-        observer = FileObserver.of(testFolder.newFile().toPath());
+        observer = FileObserver.of(testFolder.newFile().toPath(), StandardCharsets.UTF_8);
         service = new FileService();
     }
 
@@ -55,7 +55,7 @@ public class FileServiceTest extends TestHelper {
 
     @Test
     public void getFileObserverWithPath() {
-        assertThat(service.getObserver(observer.getPath())).isEqualTo(observer);
+        assertThat(service.getObserver(observer.getPath(), observer.getCharset())).isEqualTo(observer);
     }
 
     @Test
@@ -66,20 +66,13 @@ public class FileServiceTest extends TestHelper {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenGetFileObserverWithNullThenThrowIAE() {
-        service.getObserver(null);
+    public void whenGetFileObserverWithPathNullThenThrowIAE() {
+        service.getObserver(null, StandardCharsets.UTF_8);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenGetFileObserverWithNullNullThenThrowIAE() {
-        service.getObserver(null, null);
-    }
-
-    @Test
-    public void fileServiceOfPath() {
-        service = FileService.of(root);
-        assertThat(service).isNotNull();
-        assertThat(service.getTree().getDepth()).isEqualTo(1);
+    public void whenGetFileObserverWithCharsetNullNullThenThrowIAE() {
+        service.getObserver(observer.getPath(), null);
     }
 
     @Test
@@ -100,29 +93,36 @@ public class FileServiceTest extends TestHelper {
     @Test
     public void countAllLinesInFileTreeWithDepth() {
         service = FileService.of(root, depth);
-        assertThat(service.count(FileObserver.Element.LINES)).isEqualTo(12);
+
+        assertThat(service.count(FileObserver.Element.LINES, charset)).isEqualTo(12);
     }
 
     @Test
-    public void countAllWorldsInFilesTreeWithDepth() {
+    public void countAllWorldsInFileTreeWithDepth() {
         service = FileService.of(root, depth);
-        assertThat(service.count(FileObserver.Element.WORDS)).isEqualTo(42);
+        assertThat(service.count(FileObserver.Element.WORDS, charset)).isEqualTo(42);
+    }
+
+    @Test
+    public void countSymbolsInFileTreeWithDepth() {
+        service = FileService.of(root, depth);
+        assertThat(service.count(FileObserver.Element.SYMBOLS, charset)).isEqualTo(306);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void whenCountFileObserverElementWithNullThenThrowIAE() {
-        service.count((FileObserver.Element) null);
+        service.count(null, charset);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void whenCountWithNullThenThrowIAE() {
-        service.count((FileTree.Element) null);
+        service.count(null);
     }
 
     @Test
-    public void countSymbolInFilesTreeWithDepth() {
+    public void countSymbolInFileTreeWithDepth() {
         service = FileService.of(root, depth);
-        assertThat(service.count('e')).isEqualTo(18);
+        assertThat(service.count('e', charset)).isEqualTo(18);
     }
 
     @Test
@@ -138,11 +138,13 @@ public class FileServiceTest extends TestHelper {
     }
 
     @Test
-    public void getStatisticOfFileTree() {
+    public void getStatistic() {
         service = FileService.of(root, depth);
-        Map<String, Long> statistic = service.statistic(FileTree.Element.FILES_AND_FOLDERS);
+        Map<String, Long> statistic = service.statistic(charset);
         assertThat(statistic.get(FileTree.Element.FILES.toString())).isEqualTo(7);
         assertThat(statistic.get(FileTree.Element.FOLDERS.toString())).isEqualTo(4);
+        assertThat(statistic.get(FileObserver.Element.LINES.toString())).isEqualTo(12);
+        assertThat(statistic.get(FileObserver.Element.WORDS.toString())).isEqualTo(42);
     }
 
     @Test
@@ -161,12 +163,8 @@ public class FileServiceTest extends TestHelper {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenGetStatisticOfFileTreeWithNullThenThrowIAE() {
-        service.statistic(null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void whenGetStatisticOfFileObserverWithNullThenThrowIAE() {
         service.statistic(null, null);
     }
+
 }

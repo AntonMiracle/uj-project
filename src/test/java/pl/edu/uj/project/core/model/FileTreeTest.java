@@ -82,13 +82,6 @@ public class FileTreeTest extends TestHelper {
         tree.getPaths();
     }
 
-    @Test
-    public void countFilesPathWithDepth5() {
-        tree.setRoot(root);
-        tree.setDepth(5);
-        assertThat(tree.count(FileTree.Element.FILES)).isEqualTo(10L);
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void whenSearchWithNullThenThrowIAE() {
         tree.search(null);
@@ -123,7 +116,7 @@ public class FileTreeTest extends TestHelper {
 
     @Test
     public void fileTreeOfRootWithDepthSearch1() {
-        tree = FileTree.of(root);
+        tree = FileTree.of(root,1);
         assertThat(tree.getDepth()).isEqualTo(1);
         assertThat(tree).isNotNull();
     }
@@ -137,15 +130,9 @@ public class FileTreeTest extends TestHelper {
     }
 
     @Test
-    public void countFolderWithDepth() {
-        tree = FileTree.of(root, 3);
-        assertThat(tree.count(FileTree.Element.FOLDERS)).isEqualTo(4L);
-    }
-
-    @Test
     public void countFilesWithDepth() {
         tree = FileTree.of(root, 3);
-        assertThat(tree.count(FileTree.Element.FILES)).isEqualTo(6L);
+        assertThat(tree.statistic(FileTree.Element.FILES).get(FileTree.Element.FILES.toString())).isEqualTo(6L);
 
     }
 

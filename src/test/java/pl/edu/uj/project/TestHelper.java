@@ -2,6 +2,7 @@ package pl.edu.uj.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,6 +16,7 @@ import java.nio.file.Paths;
 public class TestHelper {
     private static int nameId = 1;
     protected static Path root;
+    protected final Charset charset = Charset.defaultCharset();
 
     private static void writeFile(Path path) throws IOException {
         if (!Files.isDirectory(path)) {

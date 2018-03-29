@@ -33,23 +33,6 @@ public class FileTree {
         setDepth(depth);
     }
 
-    protected FileTree(Path root) {
-        setRoot(root);
-        setDepth(1);
-    }
-
-    /**
-     * Create FileTree with root path.
-     * Use default depth = 1.
-     *
-     * @param root path of FileTree
-     * @return FileTree
-     * @throws IllegalArgumentException when root {@code null or not exist}.
-     */
-    public static FileTree of(Path root) throws IllegalArgumentException {
-        return new FileTree(root);
-    }
-
     /**
      * Create FileTree by root path and depth.
      * When {@code depth <= 0} then change {@code depth == 1};
@@ -123,17 +106,6 @@ public class FileTree {
     }
 
     /**
-     * Count elements in tree.
-     *
-     * @param element {@link Element}.
-     * @return long.
-     * @throws IllegalArgumentException when element null or not exist.
-     */
-    public long count(Element element) throws IllegalArgumentException {
-        return search(element).count();
-    }
-
-    /**
      * Make statistic for element in FileTree.
      *
      * @param element {@link Element}.
@@ -145,8 +117,9 @@ public class FileTree {
         throwIAEWhenNull(element);
         Map<String, Long> result = new TreeMap<>();
         if (element == Element.FILES_AND_FOLDERS) result = statistic();
-        if (element == Element.FILES) result.put(Element.FILES.toString(), statistic().get(Element.FILES));
-        if (element == Element.FOLDERS) result.put(Element.FOLDERS.toString(), statistic().get(Element.FOLDERS));
+        if (element == Element.FILES) result.put(Element.FILES.toString(), statistic().get(Element.FILES.toString()));
+        if (element == Element.FOLDERS)
+            result.put(Element.FOLDERS.toString(), statistic().get(Element.FOLDERS.toString()));
         return result;
     }
 
