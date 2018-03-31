@@ -1,23 +1,9 @@
 package pl.edu.uj.project.controler.imp;
 
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
-import javafx.stage.Stage;
 import pl.edu.uj.project.controler.Controller;
-import pl.edu.uj.project.core.model.FileObserver;
-import pl.edu.uj.project.service.FileService;
-import pl.edu.uj.project.view.FileTreeView;
 
-import java.io.File;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
-
-public class ControllerImp implements Controller {
-
+public class ControllerImp implements Controller{
+/*
     private TextField path;
 
     private Button getButton;
@@ -152,7 +138,8 @@ public class ControllerImp implements Controller {
         System.out.println(charset);
         String text = buildGeneralStatistic(service.statistic(charset));
         statistic.setText(text);
-        mainPane.setCenter(statistic);
+
+        mainPane.setCenter(new ScrollPane(statistic));
 
         fileTreeView.getViewTree().getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -230,6 +217,6 @@ public class ControllerImp implements Controller {
         }
         return new String[]{result, String.valueOf(newDepth)};
     }
-
+*/
 
 }

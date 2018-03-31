@@ -2,16 +2,14 @@ package pl.edu.uj.project.view;
 
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.image.ImageView;
-import pl.edu.uj.project.core.model.FileTree;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class FileTreeView {
     private TreeView<String> viewTree;
 
     public FileTreeView(Path root, int depth) {
+        /*
         ImageView icon = new ImageView("image/file-icon.png");
         if (Files.isDirectory(root)) {
             icon = new ImageView("image/folder-icon.png");
@@ -28,6 +26,7 @@ public class FileTreeView {
 //            statisticLabel.setText(FileObserver.of(Paths.get(findPath(newValue))).statisticOf(FileObserver.Element.WORDS).toString());
 //          System.out.println("PATH: "+findPath(newValue));
         });
+        */
     }
 
     public TreeView<String> getViewTree() {
@@ -35,6 +34,7 @@ public class FileTreeView {
     }
 
     private void createFileTree(TreeItem<String> root, Path path, boolean isFile) {
+        /*
         ImageView folderIcon = new ImageView("image/folder-icon.png");
         ImageView fileIcon = new ImageView("image/file-icon.png");
         if (path.getNameCount() > 0) {
@@ -64,5 +64,6 @@ public class FileTreeView {
                 root.getChildren().add(end);
             }
         }
+        */
     }
 }

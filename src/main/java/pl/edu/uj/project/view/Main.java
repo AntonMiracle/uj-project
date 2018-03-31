@@ -1,16 +1,7 @@
 package pl.edu.uj.project.view;
 
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
-import pl.edu.uj.project.controler.Controller;
-import pl.edu.uj.project.controler.imp.ControllerImp;
-import pl.edu.uj.project.core.model.FileObserver;
-
-import java.nio.charset.StandardCharsets;
 
 
 public class Main extends Application {
@@ -20,6 +11,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        /*
         String labelFormat = "%-15s : ";
         Controller controler = new ControllerImp();
 
@@ -91,7 +83,7 @@ public class Main extends Application {
         topPane.getChildren().add(depthLabel);
         topPane.getChildren().add(depth);
         topPane.getChildren().add(get);
-        topPane.getChildren().add(charsetLabel);
+        topPane.getChildЁЁren().add(charsetLabel);
         topPane.getChildren().addAll(defaultCharset, utf8, utf16, iso8859, usascii);
         topPane.getChildren().add(invisible);
         topPane.getChildren().add(elementLabel);
@@ -117,6 +109,7 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.sizeToScene();
         primaryStage.show();
+        */
     }
 
 }

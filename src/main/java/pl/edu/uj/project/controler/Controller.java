@@ -1,16 +1,7 @@
 package pl.edu.uj.project.controler;
 
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
-import javafx.stage.Stage;
-import pl.edu.uj.project.core.model.FileObserver;
-
-import java.nio.file.Path;
-import java.util.Map;
-
 public interface Controller {
+    /*
     void setFileTreeView(Path root, int depth);
 
     void setCharset(String charsetName);
@@ -46,4 +37,5 @@ public interface Controller {
     void setScene(Scene scene);
 
     void setStage(Stage application);
+    */
 }

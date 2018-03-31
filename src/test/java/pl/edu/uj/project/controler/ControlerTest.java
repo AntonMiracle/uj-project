@@ -1,18 +1,7 @@
 package pl.edu.uj.project.controler;
 
-import javafx.scene.control.*;
-import org.junit.Before;
-import org.junit.Test;
-import pl.edu.uj.project.controler.imp.ControllerImp;
-import pl.edu.uj.project.core.model.FileObserver;
-import pl.edu.uj.project.view.FileTreeView;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 public class ControlerTest {
+    /*
     private Controller controler;
 
     @Before
@@ -74,5 +63,5 @@ public class ControlerTest {
                 "  String4000 : 4000          String1000 : 1000        ";
         assertThat(controler.buildTable(statistic, 3, FileObserver.Element.WORDS)).isEqualTo(expected);
     }
-
+*/
 }
