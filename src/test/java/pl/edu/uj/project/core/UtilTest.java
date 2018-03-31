@@ -21,7 +21,7 @@ public class UtilTest {
         try {
             Util.throwIAE(true, this, "throwIAEWithMsg", "MSG");
         } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage()).isEqualTo("UtilTest#throwIAEWithMsg : MSG");
+            assertThat(e.getMessage()).isEqualTo("pl.edu.uj.project.core.UtilTest#throwIAEWithMsg : MSG");
         }
     }
 
@@ -30,7 +30,7 @@ public class UtilTest {
         try {
             Util.throwIAE(true, this, "throwIAEWithMsg", null);
         } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage()).isEqualTo("UtilTest#throwIAEWithMsg : NO MSG");
+            assertThat(e.getMessage()).isEqualTo("pl.edu.uj.project.core.UtilTest#throwIAEWithMsg : NO MSG");
         }
     }
 
@@ -39,7 +39,7 @@ public class UtilTest {
         try {
             Util.throwIAE(true, this, null, "MSG");
         } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage()).isEqualTo("UtilTest#:METHOD NAME NULL: : MSG");
+            assertThat(e.getMessage()).isEqualTo("pl.edu.uj.project.core.UtilTest#:METHOD NAME NULL: : MSG");
         }
     }
 
@@ -57,7 +57,7 @@ public class UtilTest {
         try {
             Util.throwIAEWhenNull(null, this, "methodName");
         } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage()).isEqualTo("UtilTest#methodName : Argument is NULL");
+            assertThat(e.getMessage()).isEqualTo("pl.edu.uj.project.core.UtilTest#methodName : Argument is NULL");
         }
     }
 
@@ -66,7 +66,7 @@ public class UtilTest {
         try {
             Util.throwIAEWhenNull(null, this, null);
         } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage()).isEqualTo("UtilTest#:METHOD NAME NULL: : Argument is NULL");
+            assertThat(e.getMessage()).isEqualTo("pl.edu.uj.project.core.UtilTest#:METHOD NAME NULL: : Argument is NULL");
         }
     }
 
