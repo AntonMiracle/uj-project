@@ -112,7 +112,7 @@ public class FileServiceTest extends TestHelper {
     @Test
     public void countFolderInTreeWithDepth() {
         service = FileService.of(testRoot, testDepth);
-        assertThat(service.count(FileTree.Element.FOLDERS)).isEqualTo(4);
+        assertThat(service.count(FileTree.Element.DIRECTORIES)).isEqualTo(4);
     }
 
     @Test
@@ -126,7 +126,7 @@ public class FileServiceTest extends TestHelper {
         service = FileService.of(testRoot, testDepth);
         Map<String, Long> statistic = service.statistic(charset);
         assertThat(statistic.get(FileTree.Element.FILES.toString())).isEqualTo(7);
-        assertThat(statistic.get(FileTree.Element.FOLDERS.toString())).isEqualTo(4);
+        assertThat(statistic.get(FileTree.Element.DIRECTORIES.toString())).isEqualTo(4);
         assertThat(statistic.get(FileObserver.Element.LINES.toString())).isEqualTo(12);
         assertThat(statistic.get(FileObserver.Element.WORDS.toString())).isEqualTo(42);
     }

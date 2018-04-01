@@ -136,7 +136,7 @@ public class FileService {
 //     */
 //    public Map<String, Long> statistic(Charset charset) {
 //        Map<String, Long> statistic = new TreeMap<>();
-//        statistic.put(FileTree.Element.FOLDERS.toString(), count(FileTree.Element.FOLDERS));
+//        statistic.put(FileTree.Element.DIRECTORIES.toString(), count(FileTree.Element.DIRECTORIES));
 //        statistic.put(FileTree.Element.FILES.toString(), count(FileTree.Element.FILES));
 ////        statistic.put(FileObserver.Element.LINES.toString(), count(FileObserver.Element.LINES, charset));
 //        statistic.put(FileObserver.Element.WORDS.toString(), count(FileObserver.Element.WORDS, charset));

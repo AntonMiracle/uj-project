@@ -10,10 +10,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -33,13 +30,13 @@ public class FileObserverTest extends TestHelper {
     }
 
     @Test
-    public void newFileObserverWithDirectoryPath() {
+    public void newFileObserverWithDirectoryPathAndCharset() {
         observer = new FileObserver(testDirectory, testCharset);
         assertThat(Files.isDirectory(observer.getPath())).isTrue();
     }
 
     @Test
-    public void newFileObserverWithFilePath() {
+    public void newFileObserverWithFilePathAndCharset() {
         assertThat(Files.isDirectory(observer.getPath())).isFalse();
     }
 
@@ -86,27 +83,41 @@ public class FileObserverTest extends TestHelper {
     }
 
     @Test
-    public void getLines() {
+    public void getLinesElements() {
         String[] expected = testFileText.split(System.lineSeparator());
         List<String> actual = observer.get(FileObserver.Element.LINES).collect(Collectors.toList());
+        assertThat(actual.size() == expected.length).isTrue();
         for (int i = 0; i < actual.size() && actual.size() == expected.length; ++i) {
             assertThat(actual.get(i)).isEqualTo(expected[i]);
         }
     }
 
     @Test
-    public void getWords() {
+    public void getWordsElements() {
         List<String> expected = Pattern.compile("\\PL+").splitAsStream(testFileText).collect(Collectors.toList());
         List<String> actual = observer.get(FileObserver.Element.WORDS).collect(Collectors.toList());
+        assertThat(actual.size() == expected.size()).isTrue();
         for (int i = 0; i < actual.size() && actual.size() == expected.size(); ++i) {
             assertThat(actual.get(i)).isEqualTo(expected.get(i));
         }
     }
 
     @Test
-    public void getSymbols() {
+    public void getSymbolsElements() {
         List<String> expected = testFileText.chars().mapToObj(i -> String.valueOf((char) i)).collect(Collectors.toList());
         List<String> actual = observer.get(FileObserver.Element.SYMBOLS).collect(Collectors.toList());
+        assertThat(actual.size() == expected.size()).isTrue();
+        for (int i = 0; i < actual.size() && actual.size() == expected.size(); ++i) {
+            assertThat(actual.get(i)).isEqualTo(expected.get(i));
+        }
+    }
+
+    @Test
+    public void getAllElements() {
+        List<String> expected = new ArrayList<>();
+        expected.add(testFileText);
+        List<String> actual = observer.get(FileObserver.Element.ALL).collect(Collectors.toList());
+        assertThat(actual.size() == expected.size()).isTrue();
         for (int i = 0; i < actual.size() && actual.size() == expected.size(); ++i) {
             assertThat(actual.get(i)).isEqualTo(expected.get(i));
         }
@@ -123,12 +134,12 @@ public class FileObserverTest extends TestHelper {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenElementValueOfWithWrongStringThenIAE() {
+    public void whenElementValueOfWithWrongStringThenThrowIAE() {
         FileObserver.Element.valueOf("ddd");
     }
 
     @Test
-    public void valuesReturnFour() {
+    public void elementValuesReturnFour() {
         assertThat(FileObserver.Element.values().length).isEqualTo(4);
     }
 
@@ -142,7 +153,7 @@ public class FileObserverTest extends TestHelper {
     }
 
     @Test
-    public void getStatisticWords() {
+    public void getStatisticWordsElements() {
         Map<String, Long> actual = observer.statistic(FileObserver.Element.WORDS);
         Map<String, Long> expected = new TreeMap<>();
         for (String line : testFileText.split("\\PL+")) {
@@ -156,7 +167,7 @@ public class FileObserverTest extends TestHelper {
     }
 
     @Test
-    public void getStatisticSymbols() {
+    public void getStatisticSymbolsElements() {
         Map<String, Long> actual = observer.statistic(FileObserver.Element.SYMBOLS);
         Map<String, Long> expected = new TreeMap<>();
         for (char ch : testFileText.toCharArray()) {
@@ -171,7 +182,7 @@ public class FileObserverTest extends TestHelper {
     }
 
     @Test
-    public void getStatisticLines() {
+    public void getStatisticLinesElements() {
         Map<String, Long> actual = observer.statistic(FileObserver.Element.LINES);
         Map<String, Long> expected = new TreeMap<>();
         for (String line : testFileText.split(System.lineSeparator())) {
@@ -185,7 +196,7 @@ public class FileObserverTest extends TestHelper {
     }
 
     @Test
-    public void getStatisticAll() {
+    public void getStatisticAllElements() {
         Map<String, Long> actual = observer.statistic(FileObserver.Element.ALL);
         Map<String, Long> expected = new TreeMap<>();
         expected.put(FileObserver.Element.LINES.toString(), 6L);
@@ -198,6 +209,5 @@ public class FileObserverTest extends TestHelper {
     public void whenGetStatisticWithNullElementThenThrowIAE() {
         observer.statistic(null);
     }
-
 
 }

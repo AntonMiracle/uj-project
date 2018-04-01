@@ -57,7 +57,7 @@ public class FileObserver {
 
     private void setPath(Path path) {
         Util.throwIAEWhenNull(path, this, "setPath(Path path)");
-        Util.throwIAE(!path.toFile().exists(), this, "setPath(Path path)", "Path not exist");
+        Util.throwIAE(!Files.exists(path), this, "setPath(Path path)", "Path not exist");
         Util.throwIAE(!Files.isReadable(path), this, "setPath(Path path)", "File not readable");
         isFile = Files.isDirectory(path) ? false : true;
         this.path = path;

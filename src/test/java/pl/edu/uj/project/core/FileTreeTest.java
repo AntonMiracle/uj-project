@@ -1,112 +1,102 @@
 package pl.edu.uj.project.core;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Before;
+import org.junit.Test;
 import pl.edu.uj.project.TestHelper;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 public class FileTreeTest extends TestHelper {
-    /*
-    @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder();
     private FileTree tree;
 
     @Before
-    public void before() throws IOException {
-        testRoot = Paths.get(testFolder.getRoot().toString());
-        generationFolderAndFilesForTesting(testRoot.toString(), 4);
-        tree = new FileTree();
+    public void before() {
+        tree = new FileTree(testRoot, testDepth);
     }
 
     @Test
-    public void setAndGetDepth() {
-        tree.setDepth(5);
-        assertThat(tree.getDepth()).isEqualTo(5);
-    }
-
-    @Test
-    public void whenDepthNotSetThenDepthOne() {
-        assertThat(tree.getDepth()).isEqualTo(1);
-    }
-
-    @Test
-    public void whenSetDepthWithZeroThenDepthOne() {
-        tree.setDepth(0);
-        assertThat(tree.getDepth()).isEqualTo(1);
-    }
-    @Test
-    public void whenSetDepthWithNegativeThenDepthOne() {
-        tree.setDepth(-1);
-        assertThat(tree.getDepth()).isEqualTo(1);
-    }
-
-    @Test
-    public void setAndGetRoot() {
-        tree.setRoot(testRoot);
-        assertThat(tree.getRoot()).isEqualTo(testRoot);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void whenSetRootWithNullThenThrowIAE() {
-        tree.setRoot(null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void whenSetRootWithNotExistPathThenThrowIAE() {
-        tree.setRoot(Paths.get("wrong/path"));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void whenGetRootReturnNullThenThrowIAE() {
-        tree.getRoot();
-    }
-
-    @Test
-    public void getPaths() {
-        tree.setRoot(testRoot);
-        tree.setDepth(5);
-        assertThat(tree.getPaths().count()).isEqualTo(15);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void whenGetPathsWithWrongRootOrRootNullThenThrowIAE() {
-        tree.getPaths();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void whenSearchWithNullThenThrowIAE() {
-        tree.search(null);
-    }
-
-    @Test
-    public void searchFilesPathsWithDepth1() {
-        tree.setRoot(testRoot);
-        tree.setDepth(1);
-        assertThat(tree.search(FileTree.Element.FILES).count()).isEqualTo(2);
-    }
-
-    @Test
-    public void searchFoldersPathsWithDepth1() {
-        tree.setRoot(testRoot);
-        tree.setDepth(1);
-        assertThat(tree.search(FileTree.Element.FOLDERS).count()).isEqualTo(2);
-    }
-
-    @Test
-    public void searchAllPathsWithDepth1() {
-        tree.setRoot(testRoot);
-        tree.setDepth(1);
-        assertThat(tree.search(FileTree.Element.FILES_AND_FOLDERS).count()).isEqualTo(4);
-    }
-
-    @Test
-    public void fileTreeOfRootAndDepthSearch() {
-        tree = FileTree.of(testRoot, 2);
+    public void fileTreeWithRootPathAndMaxScanDepth() {
+        tree = new FileTree(testRoot, testDepth);
         assertThat(tree).isNotNull();
     }
 
     @Test
-    public void fileTreeOfRootWithDepthSearch1() {
-        tree = FileTree.of(testRoot,1);
-        assertThat(tree.getDepth()).isEqualTo(1);
-        assertThat(tree).isNotNull();
+    public void rootPathIsFile() throws IOException {
+        tree = new FileTree(testFolder.newFile().toPath(), testDepth);
+        assertThat((tree.getRoot().toFile().isFile())).isTrue();
+    }
+
+    @Test
+    public void rootPathIsDirectory() throws IOException {
+        tree = new FileTree(testRoot, testDepth);
+        assertThat(Files.isDirectory(tree.getRoot())).isTrue();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void whenPathNotExistThenThrowIAE() {
+        new FileTree(Paths.get("wrong path"), testDepth);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void whenPathNullThenThrowIAE() {
+        new FileTree(null, testDepth);
+    }
+
+    @Test
+    public void whenMaxDepthZeroOrBelowThenDepthIsOne() {
+        assertThat(new FileTree(testRoot, 0).getMaxScanDepth()).isEqualTo(1);
+        assertThat(new FileTree(testRoot, -1).getMaxScanDepth()).isEqualTo(1);
+    }
+
+    @Test
+    public void getAllElementsFromTree() throws IOException {
+        List<Path> actual = tree.get(FileTree.Element.ALL).collect(Collectors.toList());
+        List<Path> expected = Files.walk(testRoot, testDepth).collect(Collectors.toList());
+        assertThat(actual.size() == expected.size()).isTrue();
+        for (int i = 0; i < actual.size() && actual.size() == expected.size(); ++i) {
+            assertThat(actual.get(i)).isEqualTo(expected.get(i));
+        }
+    }
+
+    @Test
+    public void getFilesElementsFromTree() throws IOException {
+        List<Path> actual = tree.get(FileTree.Element.FILES).collect(Collectors.toList());
+        List<Path> expected = Files.walk(testRoot, testDepth).filter(path -> !Files.isDirectory(path)).collect(Collectors.toList());
+        assertThat(actual.size() == expected.size()).isTrue();
+        for (int i = 0; i < actual.size() && actual.size() == expected.size(); ++i) {
+            assertThat(actual.get(i)).isEqualTo(expected.get(i));
+        }
+    }
+
+    @Test
+    public void getDirectoriesElementsFromTree() throws IOException {
+        List<Path> actual = tree.get(FileTree.Element.DIRECTORIES).collect(Collectors.toList());
+        List<Path> expected = Files.walk(testRoot, testDepth).filter(path -> Files.isDirectory(path)).collect(Collectors.toList());
+        assertThat(actual.size() == expected.size()).isTrue();
+        for (int i = 0; i < actual.size() && actual.size() == expected.size(); ++i) {
+            assertThat(actual.get(i)).isEqualTo(expected.get(i));
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void whenGetWithNullElementThenThrowIAE() {
+        tree.get(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void whenGetWithWrongElementsValueOfThenThrowIAE() {
+        tree.get(FileTree.Element.valueOf("WrongName"));
     }
 
     @Test
@@ -117,41 +107,54 @@ public class FileTreeTest extends TestHelper {
                 .verify();
     }
 
-    @Test
-    public void countFilesWithDepth() {
-        tree = FileTree.of(testRoot, 3);
-        assertThat(tree.statistic(FileTree.Element.FILES).get(FileTree.Element.FILES.toString())).isEqualTo(6L);
-
-    }
 
     @Test
-    public void getFileTreeTypeFromValueOfString() {
+    public void getFileTreeElementFromValueOfString() {
         assertThat(FileTree.Element.valueOf("FILES")).isEqualTo(FileTree.Element.FILES);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenValueOfWithWrongStringThenIAE() {
+    public void whenFileTreeElementValueOfWithWrongStringThenIAE() {
         assertThat(FileTree.Element.valueOf("null")).isEqualTo(FileTree.Element.FILES);
     }
 
     @Test
-    public void valuesReturn2() {
+    public void fileTreeElementValuesReturnThree() {
         assertThat(FileTree.Element.values().length).isEqualTo(3);
     }
 
     @Test
-    public void getStatistics() {
-        tree = FileTree.of(testRoot, 3);
-        Map<String, Long> expected = new TreeMap<>();
-        expected.put(FileTree.Element.FILES.toString(), 6L);
-        expected.put(FileTree.Element.FOLDERS.toString(), 4L);
-        Map<String, Long> actual = tree.statistic(FileTree.Element.FILES_AND_FOLDERS);
+    public void getStatisticAllElements() throws IOException {
+        Map<String, Long> actual = tree.statistic(FileTree.Element.ALL);
+        long files = Files.walk(testRoot, testDepth).filter(path -> !Files.isDirectory(path)).count();
+        long directories = Files.walk(testRoot, testDepth).filter(path -> Files.isDirectory(path)).count();
+        Map<String, Long> expected = new HashMap<>();
+        expected.put(FileTree.Element.FILES.toString(), Long.valueOf(files));
+        expected.put(FileTree.Element.DIRECTORIES.toString(), Long.valueOf(directories));
+        assertThat(expected).isEqualTo(actual);
+    }
+
+    @Test
+    public void getStatisticDirectoriesElements() throws IOException {
+        Map<String, Long> actual = tree.statistic(FileTree.Element.DIRECTORIES);
+        long directories = Files.walk(testRoot, testDepth).filter(path -> Files.isDirectory(path)).count();
+        Map<String, Long> expected = new HashMap<>();
+        expected.put(FileTree.Element.DIRECTORIES.toString(), Long.valueOf(directories));
+        assertThat(expected).isEqualTo(actual);
+    }
+
+    @Test
+    public void getStatisticFilesElements() throws IOException {
+        Map<String, Long> actual = tree.statistic(FileTree.Element.FILES);
+        long files = Files.walk(testRoot, testDepth).filter(path -> !Files.isDirectory(path)).count();
+        Map<String, Long> expected = new HashMap<>();
+        expected.put(FileTree.Element.FILES.toString(), Long.valueOf(files));
         assertThat(expected).isEqualTo(actual);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenGetStatisticWithNullThenThrowIAE() {
+    public void whenGetStatisticWithNullElementThenThrowIAE() {
         tree.statistic(null);
     }
-    */
+
 }
