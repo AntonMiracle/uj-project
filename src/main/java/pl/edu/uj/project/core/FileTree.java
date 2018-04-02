@@ -14,6 +14,7 @@ import static pl.edu.uj.project.core.Util.throwIAEWhenNull;
 
 /**
  * FileTree is consisted from files and folders that have same root path.
+ * And in the max scan depth from root.
  * Count and get files, folders or statistic.
  *
  * @author Anton Bondarenko. {@code b.anton.m.1986@gmail.com}
@@ -23,7 +24,15 @@ public class FileTree {
     private Path root;
     private int maxScanDepth;
 
-    public FileTree(Path root, int maxScanDepth) {
+    /**
+     * Create tree with root and max scn depth.
+     *
+     * @param root         path of FileTree.
+     * @param maxScanDepth max scan depth from root, for files which will bw included to FileTree. {@code If depth < 0} then depth == 1.
+     * @throws IllegalArgumentException when
+     *                                  root is null, not exist, readable == false.
+     */
+    public FileTree(Path root, int maxScanDepth) throws IllegalArgumentException {
         setRoot(root);
         setMaxScanDepth(maxScanDepth);
     }
@@ -102,13 +111,13 @@ public class FileTree {
      *
      * @param element {@link Element}.
      * @return {@code Map<String,Long>}.
-     * where String {@link Element#toString()} and long is count of elements in FileTree.
+     * where String {@link Element#name()} and long is count of elements in FileTree.
      * @throws IllegalArgumentException when element null or not exist.
      */
     public Map<String, Long> statistic(Element element) throws IllegalArgumentException {
         throwIAEWhenNull(element, this, "statistic(Element element)");
         Map<String, Long> result = new TreeMap<>();
-        String key = element.toString();
+        String key = element.name();
         if (element == Element.ALL) result = statistic();
         if (element == Element.FILES) result.put(key, statistic().get(key));
         if (element == Element.DIRECTORIES) result.put(key, statistic().get(key));
@@ -117,8 +126,8 @@ public class FileTree {
 
     private Map<String, Long> statistic() {
         Map<String, Long> result = new TreeMap<>();
-        result.put(Element.DIRECTORIES.toString(), get(Element.DIRECTORIES).count());
-        result.put(Element.FILES.toString(), get(Element.FILES).count());
+        result.put(Element.DIRECTORIES.name(), get(Element.DIRECTORIES).count());
+        result.put(Element.FILES.name(), get(Element.FILES).count());
         return result;
     }
 

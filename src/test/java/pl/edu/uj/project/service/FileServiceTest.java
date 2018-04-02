@@ -1,154 +1,147 @@
 package pl.edu.uj.project.service;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Before;
+import org.junit.Test;
 import pl.edu.uj.project.TestHelper;
+import pl.edu.uj.project.core.FileObserver;
+import pl.edu.uj.project.core.FileTree;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.TreeMap;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class FileServiceTest extends TestHelper {
-    /*
-    @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder();
-    private int testDepth;
     private FileService service;
-    private FileTree tree;
-    private FileObserver observer;
 
     @Before
-    public void before() throws IOException {
-        testDepth = 3;
-        testRoot = Paths.get(testFolder.getRoot().toString());
-        generationFolderAndFilesForTesting(testRoot.toString(), testDepth);
-        tree = FileTree.of(testRoot, testDepth);
-        observer = FileObserver.of(testFolder.newFile().toPath(), StandardCharsets.UTF_8);
-        service = new FileService();
+    public void before() {
+        service = new FileService(testRoot, testDepth, testCharset);
     }
 
     @Test
-    public void setAndGetFileTree() {
-        service.setTree(tree);
-        assertThat(service.getTree()).isEqualTo(tree);
+    public void getNewFileServiceWithPathAndMaxScanDepth() {
+        service = new FileService(testRoot, testDepth, testCharset);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenSetFileTreeWithNullThenThrowIAE() {
-        service.setTree(null);
+    public void whenGetNewFileServiceWithNullPathThenThrowIAE() {
+        new FileService(null, testDepth, testCharset);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenGetFileTreeReturnNullThenThrowIAE() {
-        service.getTree();
+    public void whenGetNewFileServiceWithNullCharsetThenThrowIAE() {
+        new FileService(testRoot, testDepth, null);
     }
 
     @Test
-    public void getFileObserverWithPath() {
-        assertThat(service.getObserver(observer.getPath(), observer.getCharset())).isEqualTo(observer);
+    public void whenGetNewFileServiceWithMaxScanDepthZeroOrBelowThenMaxScanDepthIsOne() {
+        service = new FileService(testRoot, 0, testCharset);
+        assertThat(service.getFileTree().getMaxScanDepth()).isEqualTo(1);
+        service = new FileService(testRoot, -1, testCharset);
+        assertThat(service.getFileTree().getMaxScanDepth()).isEqualTo(1);
     }
 
     @Test
-    public void getFileObserverWithPathAndCharset() {
-        Charset charset = StandardCharsets.UTF_16BE;
-        observer = FileObserver.of(observer.getPath(), charset);
-        assertThat(service.getObserver(observer.getPath(), charset)).isEqualTo(observer);
+    public void getFileObserverWithPath() throws IOException {
+        File file = testFolder.newFile();
+        service = new FileService(testRoot, 0, testCharset);
+        FileObserver observer = service.getFileObserver(file.toPath());
+        assertThat(observer.getPath()).isEqualTo(file.toPath());
+        assertThat(observer.getCharset()).isEqualTo(testCharset);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenGetFileObserverWithPathNullThenThrowIAE() {
-        service.getObserver(null, StandardCharsets.UTF_8);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void whenGetFileObserverWithCharsetNullNullThenThrowIAE() {
-        service.getObserver(observer.getPath(), null);
-    }
-
-    @Test
-    public void fileServiceOfPathAndDepth() {
-        service = FileService.of(testRoot, 4);
-        assertThat(service).isNotNull();
-        assertThat(service.getTree().getDepth()).isEqualTo(4);
+    public void whenGetFileObserverWithNullPathThenThrowIAE() {
+        service.getFileObserver(null);
     }
 
     @Test
     public void checkEqualsAndHashCode() {
         EqualsVerifier.forClass(FileService.class)
                 .usingGetClass()
+                .withPrefabValues(Charset.class, StandardCharsets.UTF_8, StandardCharsets.UTF_16)
                 .suppress(Warning.NONFINAL_FIELDS)
                 .verify();
     }
 
     @Test
-    public void countAllLinesInFileTreeWithDepth() {
-        service = FileService.of(testRoot, testDepth);
-
-        assertThat(service.count(FileObserver.Element.LINES, charset)).isEqualTo(12);
-    }
-
-    @Test
-    public void countAllWorldsInFileTreeWithDepth() {
-        service = FileService.of(testRoot, testDepth);
-        assertThat(service.count(FileObserver.Element.WORDS, charset)).isEqualTo(42);
-    }
-
-    @Test
-    public void countSymbolsInFileTreeWithDepth() {
-        service = FileService.of(testRoot, testDepth);
-        assertThat(service.count(FileObserver.Element.SYMBOLS, charset)).isEqualTo(306);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void whenCountFileObserverElementWithNullThenThrowIAE() {
-        service.count(null, charset);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void whenCountWithNullThenThrowIAE() {
-        service.count(null);
-    }
-
-    @Test
-    public void countSymbolInFileTreeWithDepth() {
-        service = FileService.of(testRoot, testDepth);
-        assertThat(service.count('e', charset)).isEqualTo(18);
-    }
-
-    @Test
-    public void countFolderInTreeWithDepth() {
-        service = FileService.of(testRoot, testDepth);
-        assertThat(service.count(FileTree.Element.DIRECTORIES)).isEqualTo(4);
-    }
-
-    @Test
-    public void countFilesInTreeWithDepth() {
-        service = FileService.of(testRoot, testDepth);
-        assertThat(service.count(FileTree.Element.FILES)).isEqualTo(7);
-    }
-
-    @Test
-    public void getStatistic() {
-        service = FileService.of(testRoot, testDepth);
-        Map<String, Long> statistic = service.statistic(charset);
-        assertThat(statistic.get(FileTree.Element.FILES.toString())).isEqualTo(7);
-        assertThat(statistic.get(FileTree.Element.DIRECTORIES.toString())).isEqualTo(4);
-        assertThat(statistic.get(FileObserver.Element.LINES.toString())).isEqualTo(12);
-        assertThat(statistic.get(FileObserver.Element.WORDS.toString())).isEqualTo(42);
-    }
-
-    @Test
-    public void getStatisticOfWordsFileObserver() throws IOException {
-        service = FileService.of(testRoot, testDepth);
+    public void getStatisticAll() {
+        service = new FileService(testRoot, 0, testCharset);
+        Map<String, Long> actual = service.statistic();
         Map<String, Long> expected = new TreeMap<>();
-        expected.put("Folder", 6L);
-        expected.put("Hello", 6L);
-        expected.put("This", 6L);
-        expected.put("World", 6L);
-        expected.put("file", 6L);
-        expected.put("is", 6L);
-        expected.put("txt", 6L);
-        Map<String, Long> statistic = service.statistic(FileObserver.Element.WORDS, Charset.defaultCharset());
-        assertThat(statistic).isEqualTo(expected);
+        String key = FileTree.Element.FILES.name();
+        Long value = service.getFileTree().get(FileTree.Element.FILES).count();
+        expected.put(key, value);
+        key = FileTree.Element.DIRECTORIES.name();
+        value = service.getFileTree().get(FileTree.Element.DIRECTORIES).count();
+        expected.put(key, value);
+        service.getFileTree().get(FileTree.Element.FILES).forEach(path -> {
+            Map<String, Long> result = new TreeMap<>();
+            result.put(FileObserver.Element.LINES.name(), service.getFileObserver(path).get(FileObserver.Element.LINES).count());
+            result.put(FileObserver.Element.WORDS.name(), service.getFileObserver(path).get(FileObserver.Element.WORDS).count());
+            result.put(FileObserver.Element.SYMBOLS.name(), service.getFileObserver(path).get(FileObserver.Element.SYMBOLS).count());
+            sumMaps(expected, result);
+        });
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    public void getStatisticLines() {
+        service = new FileService(testRoot, 1, testCharset);
+        Map<String, Long> actual = service.statistic(FileObserver.Element.LINES);
+        Map<String, Long> expected = new TreeMap<>();
+        service.getFileTree().get(FileTree.Element.FILES).forEach(path -> {
+            Map<String, Long> result = service.getFileObserver(path).statistic(FileObserver.Element.LINES);
+            sumMaps(expected, result);
+        });
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    public void getStatisticWords() {
+        service = new FileService(testRoot, 1, testCharset);
+        Map<String, Long> actual = service.statistic(FileObserver.Element.WORDS);
+        Map<String, Long> expected = new TreeMap<>();
+        service.getFileTree().get(FileTree.Element.FILES).forEach(path -> {
+            Map<String, Long> result = service.getFileObserver(path).statistic(FileObserver.Element.WORDS);
+            sumMaps(expected, result);
+        });
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    public void getStatisticSymbols() {
+        service = new FileService(testRoot, 1, testCharset);
+        Map<String, Long> actual = service.statistic(FileObserver.Element.SYMBOLS);
+        Map<String, Long> expected = new TreeMap<>();
+        service.getFileTree().get(FileTree.Element.FILES).forEach(path -> {
+            Map<String, Long> result = service.getFileObserver(path).statistic(FileObserver.Element.SYMBOLS);
+            sumMaps(expected, result);
+        });
+        assertThat(actual.keySet().size()).isEqualTo(expected.keySet().size());
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void whenGetStatisticOfFileObserverWithNullThenThrowIAE() {
-        service.statistic(null, null);
+    public void whenGetStatisticWithNullElementsThenThrowIAE() {
+        service.statistic(null);
     }
-*/
+
+    private void sumMaps(Map<String, Long> sum, Map<String, Long> needToSum) {
+        for (String resultKey : needToSum.keySet()) {
+            if (sum.containsKey(resultKey)) {
+                Long newValue = sum.get(resultKey) + needToSum.get(resultKey);
+                sum.put(resultKey, newValue);
+            } else {
+                sum.put(resultKey, needToSum.get(resultKey));
+            }
+        }
+    }
 }

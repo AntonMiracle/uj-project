@@ -28,7 +28,7 @@ public class FileObserver {
      *
      * @param path    of file to observe.
      * @param charset for file to observe.
-     * @throws IllegalArgumentException if path : null, not exist, not readable.
+     * @throws IllegalArgumentException if path : null, not exist, readable == false.
      *                                  if charset : null.
      *                                  if IOException while try read file.
      */
@@ -117,7 +117,8 @@ public class FileObserver {
      * Statistic for element.
      *
      * @param element for statistic. {@link FileObserver.Element}.
-     * @return
+     * @return {@code Map<String,Long>}
+     * where String {@link Element#name()} and long is count of elements in file.
      * @throws IllegalArgumentException when element is null.
      */
     public Map<String, Long> statistic(Element element) throws IllegalArgumentException {
@@ -138,9 +139,9 @@ public class FileObserver {
 
     private Map<String, Long> statistic() {
         Map<String, Long> result = new TreeMap<>();
-        result.put(Element.LINES.toString(), get(Element.LINES).count());
-        result.put(Element.WORDS.toString(), get(Element.WORDS).count());
-        result.put(Element.SYMBOLS.toString(), get(Element.SYMBOLS).count());
+        result.put(Element.LINES.name(), get(Element.LINES).count());
+        result.put(Element.WORDS.name(), get(Element.WORDS).count());
+        result.put(Element.SYMBOLS.name(), get(Element.SYMBOLS).count());
         return result;
     }
 
