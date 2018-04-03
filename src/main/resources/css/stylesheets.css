@@ -9,7 +9,7 @@
     -fx-border-color: black;
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
-    -fx-min-width: 600px;
+    -fx-min-width: 400px;
     -fx-min-height: 40px;
     -fx-background-color: rgba(255, 255, 255, 0.2);
 }
@@ -17,6 +17,10 @@
 #top-pane {
     -fx-padding: 20px;
     -fx-hgap: 5px;
+}
+
+#general-error-label {
+    -fx-min-width: 400px;
 }
 
 #general-label {
