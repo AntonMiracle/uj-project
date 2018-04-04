@@ -1,6 +1,6 @@
-package pl.edu.uj.project.controler;
+package pl.edu.uj.project.view.Util;
 
-public class HeadStatisticUnit {
+public class STUHead {
 
     private Long element1;
     private Long element2;
@@ -8,7 +8,7 @@ public class HeadStatisticUnit {
     private Long element4;
     private Long element5;
 
-    public HeadStatisticUnit(Long element1, Long element2, Long element3, Long element4, Long element5) {
+    public STUHead(Long element1, Long element2, Long element3, Long element4, Long element5) {
         this.element1 = element1;
         this.element2 = element2;
         this.element3 = element3;
@@ -34,5 +34,16 @@ public class HeadStatisticUnit {
 
     public String getElement5() {
         return element5.toString();
+    }
+
+    public String[] getFiveElementsVarName() {
+        String[] result = new String[]{
+                "element1",
+                "element2",
+                "element3",
+                "element4",
+                "element5",
+        };
+        return result;
     }
 }

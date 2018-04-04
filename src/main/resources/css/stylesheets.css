@@ -4,13 +4,33 @@
     -fx-background-repeat: no-repeat;
 }
 
+#general-spinner {
+    -fx-border-insets: 5px;
+    -fx-background-insets: 5px;
+    -fx-padding: 5px;
+    -fx-min-width: 100px;
+    -fx-max-width: 100px;
+}
+
+#general-combo-box {
+    -fx-min-width: 200px;
+    -fx-max-width: 200px;
+    -fx-border-insets: 5px;
+    -fx-background-insets: 5px;
+    -fx-padding: 5px;
+}
+
 #general-text-field {
-    -fx-font: 12 arial;
+    -fx-border-insets: 5px;
+    -fx-background-insets: 5px;
+    -fx-padding: 5px;
+    -fx-font-weight: bold;
+    -fx-font: 20 arial;
     -fx-border-color: black;
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
-    -fx-min-width: 400px;
     -fx-min-height: 40px;
+    -fx-max-height: 40px;
     -fx-background-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -20,10 +40,18 @@
 }
 
 #general-error-label {
-    -fx-min-width: 400px;
+    -fx-border-insets: 5px;
+    -fx-background-insets: 5px;
+    -fx-padding: 5px;
+    -fx-font-weight: bold;
+    -fx-font: 20 arial;
+    -fx-text-fill: red;
 }
 
 #general-label {
+    -fx-border-insets: 5px;
+    -fx-background-insets: 5px;
+    -fx-padding: 5px;
     -fx-font: 20 arial;
     -fx-font-weight: bold;
     -fx-text-fill: #333333;
@@ -33,14 +61,10 @@
     -fx-alignment: center;
 }
 
-#general-tree-view {
-    -fx-background-color: rgba(255, 255, 255, 0.4);
-    -fx-min-width: 300px;
-    -fx-font: 14 arial;
-    -fx-font-weight: bold;
-}
-
 #idle-button {
+    -fx-border-insets: 5px;
+    -fx-background-insets: 5px;
+    -fx-padding: 5px;
     -fx-spacing: 10px;
     -fx-min-width: 100px;
     -fx-min-height: 40px;
@@ -56,6 +80,9 @@
 }
 
 #focus-button {
+    -fx-border-insets: 5px;
+    -fx-background-insets: 5px;
+    -fx-padding: 5px;
     -fx-spacing: 10px;
     -fx-min-width: 100px;
     -fx-min-height: 40px;
@@ -68,4 +95,21 @@
     -fx-border-width: 1px;
     -fx-border-radius: 10px;
     -fx-border-style: solid;
+}
+
+#general-tree-view {
+    -fx-background-color: rgba(255, 255, 255, 0.4);
+    -fx-min-width: 300px;
+    -fx-font: 14 arial;
+    -fx-font-weight: bold;
+}
+
+#footer {
+    -fx-border-insets: 10px;
+    -fx-background-insets: 10px;
+    -fx-padding: 10px;
+    -fx-text-alignment: center;
+    -fx-font: 16 arial;
+    -fx-font-weight: bold;
+    -fx-text-fill: greenyellow;
 }

@@ -1,5 +1,5 @@
 group 'uj-project'
-version '0.1'
+version '1.0'
 
 apply plugin: 'java'
 apply plugin: 'jacoco'
@@ -10,6 +10,11 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'pl.edu.uj.project.view.Main'
+    }
+}
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile 'org.assertj:assertj-core:3.9.0'
