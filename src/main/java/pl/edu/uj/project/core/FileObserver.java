@@ -86,20 +86,10 @@ public class FileObserver {
         Util.throwIAEWhenNull(element, this, "get(Element element)");
         Stream<String> result = Stream.of("");
         if (element == Element.WORDS) result = Pattern.compile("\\PL+").splitAsStream(getText());
-        if (element == Element.LINES) result = getLines();
+        if (element == Element.LINES) result = Pattern.compile("\\R").splitAsStream(getText());
         if (element == Element.SYMBOLS) result = getText().chars().mapToObj(i -> String.valueOf((char) i));
         if (element == Element.ALL) result = Stream.of(getText());
         return result;
-    }
-
-    private Stream<String> getLines() {
-        List<String> result = new ArrayList<>();
-        Scanner scanner = new Scanner(getText());
-        while (scanner.hasNextLine()) {
-            result.add(scanner.nextLine());
-        }
-        scanner.close();
-        return result.stream();
     }
 
     public static Set<Charset> charsets() {

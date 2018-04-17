@@ -9,6 +9,7 @@ import javafx.scene.layout.Pane;
 import pl.edu.uj.project.core.FileObserver;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class HeadPane {
     private final Label pathLabel;
@@ -87,7 +88,7 @@ public class HeadPane {
     }
 
     private Spinner<Integer> initDepthSpinner() {
-        Spinner<Integer> depthSpinner = new Spinner<>(1, 6, 1, 1);
+        Spinner<Integer> depthSpinner = new Spinner<>(1, 3, 1, 1);
         depthSpinner.setId("general-spinner");
         depthSpinner.setPrefSize(60, 20);
         return depthSpinner;
@@ -100,7 +101,7 @@ public class HeadPane {
         }
         ComboBox<String> charsetComboBox = new ComboBox<>(list);
         charsetComboBox.setId("general-combo-box");
-        charsetComboBox.setValue(list.get(0));
+        charsetComboBox.setValue(StandardCharsets.UTF_8.name());
         return charsetComboBox;
     }
 

@@ -77,9 +77,6 @@ public class FileTreePane {
         TreeView<String> view = new TreeView<>();
         view.setRoot(treeItem);
         view.showRootProperty();
-//        view.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-//            findPathAndDepth(newValue);
-//        });
         return view;
     }
 

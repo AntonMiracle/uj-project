@@ -8,11 +8,13 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import pl.edu.uj.project.core.FileObserver;
+import pl.edu.uj.project.core.Util;
 import pl.edu.uj.project.view.FileTreePane;
 import pl.edu.uj.project.view.HeadPane;
 import pl.edu.uj.project.view.StatisticPane;
 
 import java.nio.charset.Charset;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -28,6 +30,7 @@ public class Controller {
     private StatisticPane statisticPane;
 
     public Controller(Stage application) {
+        Util.throwIAEWhenNull(application,this,"constructor");
         this.mainPane = initMainPane(application);
         this.application = initApplication(application);
         this.headPane = initHeadPane(mainPane);
@@ -42,7 +45,7 @@ public class Controller {
 
     private BorderPane initMainPane(Stage application) {
         BorderPane mainPane = new BorderPane();
-        Label footer = new Label("Developed by Anton Bondarenko | e-mail : b.anton.m.1986@gmail.com");
+        Label footer = new Label("Developed by Anton Bondarenko | e-mail: b.anton.m.1986@gmail.com");
         footer.setId("footer");
         BorderPane.setAlignment(footer, Pos.CENTER);
         mainPane.setBottom(footer);
@@ -77,7 +80,7 @@ public class Controller {
                     this.pickedCharset = headPane.getCharset();
                     initFileTreePane(true);
                     initStatisticPane(true);
-                } catch (Throwable ex) {
+                } catch (InvalidPathException ex) {
                     headPane.getErrorLabel().setText("Path not exist or not readable");
                 }
 
