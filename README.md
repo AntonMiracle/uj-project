@@ -9,7 +9,7 @@ Projekt semestralny
 ### Back-end (TDD + TAD)
 
 # Project Template
-### Front-end (MVC)
+### MVC
 
 # Other
 ### NULL is IllegalArgumentException
