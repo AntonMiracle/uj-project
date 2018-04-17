@@ -29,5 +29,4 @@ gradlew
 gradlew.bat
 settings.gradle
 build
-TestFolder
-docs
+!build\reports
